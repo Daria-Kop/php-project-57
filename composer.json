@@ -1,0 +1,11 @@
+{
+    "name": "hexlet/code",
+    "autoload": {
+        "psr-4": {
+            "Hexlet\\Code\\": "src/"
+        }
+    },
+    "require": {
+        "sentry/sentry-laravel": "^4.12"
+    }
+}
