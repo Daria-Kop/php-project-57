@@ -2,73 +2,75 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\LabelRequest;
 use App\Models\Label;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Auth;
 
 class LabelController extends Controller
 {
-    use AuthorizesRequests;
-
     /**
      * Display a listing of the resource.
      */
-    public function index(Label $label)
+    public function index()
     {
-        $this->authorize('view', $label);
-        $labels = Label::all();
-
-        return view('labels.index', compact('labels'));
+        $labels = Label::paginate();
+        return view('label.index', compact('labels'));
     }
 
     /**
      * Show the form for creating a new resource.
      */
-    public function create(Request $request)
+    public function create()
     {
-        $this->authorize('create', Label::class);
-        $backUrl = $request->input('backUrl', route('labels.index'));
-
-        return view('labels.create', ['label' => new Label(), 'backUrl' => $backUrl]);
+        if (Auth::check()) {
+            return view('label.create');
+        }
+        return abort(401);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(LabelRequest $request)
+    public function store(Request $request): RedirectResponse
     {
-        $this->authorize('create', Label::class);
-        $this->saveLabel(new Label(), $request);
-        flash('Метка успешно создана')->success();
-        $backUrl = $request->input('backUrl', route('labels.index'));
-
-        return redirect($backUrl);
+        $dataFill = $request->validate([
+            'name' => 'required|unique:labels|max:20',
+            'description' => 'max:100',
+        ], [''], ['name' => __('label.label')]);
+        $label = new Label();
+        $label->fill($dataFill);
+        $label->save();
+        flash(__('label.flashCreate'))->success();
+        return redirect()
+            ->route('label.index');
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Label $label, Request $request)
+    public function edit(Label $label)
     {
-        $this->authorize('update', $label);
-        $backUrl = $request->input('backUrl', route('labels.index'));
-
-        return view('labels.edit', ['label' => $label, 'backUrl' => $backUrl]);
+        if (Auth::check()) {
+            return view('label.edit', ['label' => $label]);
+        }
+        return abort(401);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(LabelRequest $request, Label $label)
+    public function update(Request $request, Label $label): RedirectResponse
     {
-        $this->authorize('update', $label);
-        $this->saveLabel($label, $request);
-        flash(__('Метка успешно изменена'))->success();
-        $backUrl = $request->input('backUrl', route('labels.index'));
-
-        return redirect($backUrl);
+        $data = $request->validate([
+            'name' => "required|max:20|unique:labels,name,{$label->id}",
+            'description' => 'max:100',
+        ], [''], ['name' => __('label.label')]);
+        $label->fill($data);
+        $label->save();
+        flash(__('label.flashChange'))->success();
+        return redirect()
+            ->route('label.index');
     }
 
     /**
@@ -76,21 +78,17 @@ class LabelController extends Controller
      */
     public function destroy(Label $label)
     {
-        $this->authorize('delete', $label);
-        try {
-            $label->delete();
-            flash(__('Метка успешно удалена'))->success();
-        } catch (\Exception $e) {
-            flash(__('Не удалось удалить метку'))->error();
+        if (Auth::check()) {
+            try {
+                $label->delete();
+            } catch (\Exception $e) {
+                flash(__('label.flashNotDelete'))->error();
+                return redirect()
+                    ->route('label.index');
+            }
+            flash(__('label.flashDelete'))->success();
+            return redirect()->route('label.index');
         }
-
-        return redirect()->route('labels.index');
-    }
-
-    private function saveLabel(Label $label, LabelRequest $request)
-    {
-        $validated = $request->validated();
-        $label->fill($validated);
-        $label->save();
+        return abort(401);
     }
 }
