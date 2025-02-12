@@ -37,7 +37,7 @@ test:
 
 test-coverage:
 	XDEBUG_MODE=coverage php artisan test --coverage-clover build/logs/clover.xml
-	XDEBUG_MODE=coverage php artisan test --coverage-html build/logs/html
+
 ide-helper:
 	php artisan ide-helper:eloquent
 	php artisan ide-helper:gen
