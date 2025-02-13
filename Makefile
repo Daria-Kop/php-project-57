@@ -32,12 +32,14 @@ install-test:
 
 test:
 	php artisan test
-
+validate:
+	composer validate
 test-coverage:
-	XDEBUG_MODE=coverage php artisan test --coverage-clover build/logs/clover.xml
-
+	XDEBUG_MODE=coverage php artisan test --coverage-html build/logs/html
 ide-helper:
 	php artisan ide-helper:eloquent
 	php artisan ide-helper:gen
 	php artisan ide-helper:meta
 	php artisan ide-helper:mod -n
+lint:
+	composer exec --verbose phpcs -- --standard=PSR12 app
