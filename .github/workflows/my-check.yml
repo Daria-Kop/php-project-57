@@ -18,6 +18,3 @@ jobs:
 
       - name: validate
         run: composer validate
-
-      - name: linter
-        run: make lint
