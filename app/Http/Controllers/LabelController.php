@@ -9,96 +9,63 @@ use Illuminate\Support\Facades\Auth;
 
 class LabelController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    public function __construct()
+    {
+        $this->authorizeResource(Label::class);
+    }
+
     public function index()
     {
         $labels = Label::paginate();
-
         return view('label.index', compact('labels'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        if (Auth::check()) {
-            return view('label.create');
-        }
-
-        return abort(401);
+        return view('label.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request): RedirectResponse
     {
-        $dataFill = $request->validate([
+        $data = $request->validate([
             'name' => 'required|unique:labels|max:20',
             'description' => 'max:100',
-        ], [''], ['name' => __('label.label')]);
+        ]);
 
-        $label = new Label();
-        $label->fill($dataFill);
-        $label->save();
+        Label::create($data);
 
         flash(__('label.flashCreate'))->success();
 
-        return redirect()->route('label.index');
+        return redirect()->route('labels.index');
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(Label $label)
     {
-        if (Auth::check()) {
-            return view('label.edit', ['label' => $label]);
-        }
-
-        return abort(401);
+        return view('label.edit', ['label' => $label]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, Label $label): RedirectResponse
     {
         $data = $request->validate([
             'name' => "required|max:20|unique:labels,name,{$label->id}",
             'description' => 'max:100',
-        ], [''], ['name' => __('label.label')]);
+        ]);
 
-        $label->fill($data);
-        $label->save();
+        $label->update($data);
 
         flash(__('label.flashChange'))->success();
 
-        return redirect()->route('label.index');
+        return redirect()->route('labels.index');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Label $label)
+    public function destroy(Label $label): RedirectResponse
     {
-        if (Auth::check()) {
-            try {
-                $label->delete();
-            } catch (\Exception $e) {
-                flash(__('label.flashNotDelete'))->error();
+        $this->authorize('delete', $label);
 
-                return redirect()->route('label.index');
-            }
+        $label->delete();
 
-            flash(__('label.flashDelete'))->success();
+        flash(__('label.flashDelete'))->success();
 
-            return redirect()->route('label.index');
-        }
-
-        return abort(401);
+        return redirect()->route('labels.index');
     }
 }
