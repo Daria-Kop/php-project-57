@@ -15,6 +15,7 @@ class LabelController extends Controller
     public function index()
     {
         $labels = Label::paginate();
+        
         return view('label.index', compact('labels'));
     }
 
@@ -26,6 +27,7 @@ class LabelController extends Controller
         if (Auth::check()) {
             return view('label.create');
         }
+        
         return abort(401);
     }
 
@@ -38,12 +40,14 @@ class LabelController extends Controller
             'name' => 'required|unique:labels|max:20',
             'description' => 'max:100',
         ], [''], ['name' => __('label.label')]);
+
         $label = new Label();
         $label->fill($dataFill);
         $label->save();
+
         flash(__('label.flashCreate'))->success();
-        return redirect()
-            ->route('label.index');
+        
+        return redirect()->route('label.index');
     }
 
     /**
@@ -54,6 +58,7 @@ class LabelController extends Controller
         if (Auth::check()) {
             return view('label.edit', ['label' => $label]);
         }
+        
         return abort(401);
     }
 
@@ -66,11 +71,13 @@ class LabelController extends Controller
             'name' => "required|max:20|unique:labels,name,{$label->id}",
             'description' => 'max:100',
         ], [''], ['name' => __('label.label')]);
+
         $label->fill($data);
         $label->save();
+
         flash(__('label.flashChange'))->success();
-        return redirect()
-            ->route('label.index');
+        
+        return redirect()->route('label.index');
     }
 
     /**
@@ -83,12 +90,15 @@ class LabelController extends Controller
                 $label->delete();
             } catch (\Exception $e) {
                 flash(__('label.flashNotDelete'))->error();
-                return redirect()
-                    ->route('label.index');
+                
+                return redirect()->route('label.index');
             }
+
             flash(__('label.flashDelete'))->success();
+            
             return redirect()->route('label.index');
         }
+        
         return abort(401);
     }
 }
