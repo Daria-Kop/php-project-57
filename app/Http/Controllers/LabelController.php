@@ -2,70 +2,95 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\LabelRequest;
 use App\Models\Label;
-use Illuminate\Http\RedirectResponse;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Routing\Controller;
 
 class LabelController extends Controller
 {
-    public function __construct()
+    use AuthorizesRequests;
+
+    /**
+     * Display a listing of the resource.
+     */
+    public function index(Label $label)
     {
-        $this->authorizeResource(Label::class);
+        $this->authorize('view', $label);
+        $labels = Label::all();
+
+        return view('labels.index', compact('labels'));
     }
 
-    public function index()
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create(Request $request)
     {
-        $labels = Label::paginate();
-        return view('label.index', compact('labels'));
+        $this->authorize('create', Label::class);
+        $backUrl = $request->input('backUrl', route('labels.index'));
+
+        return view('labels.create', ['label' => new Label(), 'backUrl' => $backUrl]);
     }
 
-    public function create()
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(LabelRequest $request)
     {
-        return view('label.create');
+        $this->authorize('create', Label::class);
+        $this->saveLabel(new Label(), $request);
+        flash('Метка успешно создана')->success();
+        $backUrl = $request->input('backUrl', route('labels.index'));
+
+        return redirect($backUrl);
     }
 
-    public function store(Request $request): RedirectResponse
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(Label $label, Request $request)
     {
-        $data = $request->validate([
-            'name' => 'required|unique:labels|max:20',
-            'description' => 'max:100',
-        ]);
+        $this->authorize('update', $label);
+        $backUrl = $request->input('backUrl', route('labels.index'));
 
-        Label::create($data);
-
-        flash(__('label.flashCreate'))->success();
-
-        return redirect()->route('labels.index');
+        return view('labels.edit', ['label' => $label, 'backUrl' => $backUrl]);
     }
 
-    public function edit(Label $label)
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(LabelRequest $request, Label $label)
     {
-        return view('label.edit', ['label' => $label]);
+        $this->authorize('update', $label);
+        $this->saveLabel($label, $request);
+        flash(__('Метка успешно изменена'))->success();
+        $backUrl = $request->input('backUrl', route('labels.index'));
+
+        return redirect($backUrl);
     }
 
-    public function update(Request $request, Label $label): RedirectResponse
-    {
-        $data = $request->validate([
-            'name' => "required|max:20|unique:labels,name,{$label->id}",
-            'description' => 'max:100',
-        ]);
-
-        $label->update($data);
-
-        flash(__('label.flashChange'))->success();
-
-        return redirect()->route('labels.index');
-    }
-
-    public function destroy(Label $label): RedirectResponse
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(Label $label)
     {
         $this->authorize('delete', $label);
-
-        $label->delete();
-
-        flash(__('label.flashDelete'))->success();
+        try {
+            $label->delete();
+            flash(__('Метка успешно удалена'))->success();
+        } catch (\Exception $e) {
+            flash(__('Не удалось удалить метку'))->error();
+        }
 
         return redirect()->route('labels.index');
+    }
+
+    private function saveLabel(Label $label, LabelRequest $request)
+    {
+        $validated = $request->validated();
+        $label->fill($validated);
+        $label->save();
     }
 }
