@@ -2,28 +2,53 @@
 
 namespace App\Policies;
 
-use App\Models\User;
 use App\Models\Label;
+use App\Models\User;
+use Illuminate\Auth\Access\Response;
+use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Support\Facades\Auth;
 
 class LabelPolicy
 {
-    public function view(User $user, Label $label)
+    use HandlesAuthorization;
+
+    /**
+     * Determine whether the user can view any models.
+     */
+    public function viewAny(?User $user): bool
     {
-        return true; // пример условия
+        return true;
     }
 
-    public function create(User $user)
+    /**
+     * Determine whether the user can view the model.
+     */
+    public function view(?User $user, Label $Label): bool
     {
-        return true; // пример условия
+        return true;
     }
 
-    public function update(User $user, Label $label)
+    /**
+     * Determine whether the user can create models.
+     */
+    public function create(User $user): bool
     {
-        return true; // пример условия
+        return Auth::check();
     }
 
-    public function delete(User $user, Label $label)
+    /**
+     * Determine whether the user can update the model.
+     */
+    public function update(User $user, Label $Label): bool
     {
-        return !$label->tasks()->exists(); // нельзя удалить, если есть задачи, например
+        return Auth::check();
+    }
+
+    /**
+     * Determine whether the user can delete the model.
+     */
+    public function delete(User $user, Label $Label): bool
+    {
+        return Auth::check();
     }
 }

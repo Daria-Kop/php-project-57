@@ -7,6 +7,8 @@ use Tests\TestCase;
 
 class RegistrationTest extends TestCase
 {
+    use RefreshDatabase;
+
     public function testRegistrationScreenCanBeRendered(): void
     {
         $response = $this->get('/register');
@@ -24,6 +26,6 @@ class RegistrationTest extends TestCase
         ]);
 
         $this->assertAuthenticated();
-        $response->assertRedirect(route('dashboard', absolute: false));
+        $response->assertRedirect(route('index', absolute: false));
     }
 }

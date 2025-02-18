@@ -8,6 +8,8 @@ use Tests\TestCase;
 
 class AuthenticationTest extends TestCase
 {
+    use RefreshDatabase;
+
     public function testLoginScreenCanBeRendered(): void
     {
         $response = $this->get('/login');
@@ -25,7 +27,7 @@ class AuthenticationTest extends TestCase
         ]);
 
         $this->assertAuthenticated();
-        $response->assertRedirect(route('dashboard', absolute: false));
+        $response->assertRedirect(route('index', absolute: false));
     }
 
     public function testUsersCanNotAuthenticateWithInvalidPassword(): void
@@ -47,6 +49,6 @@ class AuthenticationTest extends TestCase
         $response = $this->actingAs($user)->post('/logout');
 
         $this->assertGuest();
-        $response->assertRedirect('/');
+        $response->assertRedirect(url()->previous());
     }
 }

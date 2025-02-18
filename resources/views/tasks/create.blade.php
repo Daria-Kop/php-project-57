@@ -1,0 +1,10 @@
+@extends('layouts.app')
+
+@section('content')
+    <x-h1>{{ __('Создать задачу') }}</x-h1>
+
+    {{ html()->modelForm($task, 'POST', route('tasks.store', $task))->id('taskForm')->open() }}
+    @include('tasks.form')
+    {{ html()->submit( __('Создать'))->class('btn-primary') }}
+    {{ html()->closeModelForm() }}
+@endsection

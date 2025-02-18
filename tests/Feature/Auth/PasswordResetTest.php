@@ -10,6 +10,8 @@ use Tests\TestCase;
 
 class PasswordResetTest extends TestCase
 {
+    use RefreshDatabase;
+
     public function testResetPasswordLinkScreenCanBeRendered(): void
     {
         $response = $this->get('/forgot-password');

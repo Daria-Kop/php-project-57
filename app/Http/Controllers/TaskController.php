@@ -2,41 +2,51 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\TaskRequest;
 use App\Models\Label;
-use App\Models\Task;
-use App\Models\TaskStatus;
-use App\Models\User;
-use Illuminate\Http\RedirectResponse;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Spatie\QueryBuilder\AllowedFilter;
-use Spatie\QueryBuilder\QueryBuilder;
+use App\Models\TaskStatus;
+use App\Models\Task;
+use App\Models\User;
+use Illuminate\Routing\Controller;
 
 class TaskController extends Controller
 {
+    use AuthorizesRequests;
+
+    protected Collection $taskStatuses;
+    protected Collection $users;
+    protected Collection $labels;
+
+    public function __construct()
+    {
+        $this->taskStatuses = TaskStatus::all();
+        $this->users = User::all();
+        $this->labels = Label::all();
+    }
+
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index(Request $request, Task $task)
     {
-        $statusId = $request->collect()->value('status_id');
-        $createdId = $request->collect()->value('created_by_id');
-        $assignedId = $request->collect()->value('assigned_to_id');
-        $taskStatuses = TaskStatus::all();
-        $users = User::all();
-        $tasks = QueryBuilder::for(Task::class)
-            ->allowedFilters([AllowedFilter::exact('status_id'),
-                AllowedFilter::exact('created_by_id'),
-                AllowedFilter::exact('assigned_to_id')
-            ])
-            ->get();
-        return view('task.index', [
+        $this->authorize('view', $task);
+        $filters = $request->input('filter', []);
+
+        $tasks = Task::query()
+            ->filterByStatus($filters['status_id'] ?? null)
+            ->filterByCreatedBy($filters['created_by_id'] ?? null)
+            ->filterByAssignedTo($filters['assigned_to_id'] ?? null)
+            ->paginate(15);
+
+        return view('tasks.index', [
+            'task' => new Task(),
             'tasks' => $tasks,
-            'users' => $users,
-            'taskStatuses' => $taskStatuses,
-            'statusId' => (int)$statusId,
-            'createdId' => (int)$createdId,
-            'assignedId' => (int)$assignedId,
+            'taskStatuses' => $this->taskStatuses,
+            'users' => $this->users,
+            'filters' => $filters,
         ]);
     }
 
@@ -45,43 +55,26 @@ class TaskController extends Controller
      */
     public function create()
     {
-        if (Auth::check()) {
-            $taskStatuses = TaskStatus::all();
-            $users = User::all();
-            $labels = Label::all();
-            return view(
-                'task.create',
-                [
-                    'task_statuses' => $taskStatuses,
-                    'users' => $users,
-                    'labels' => $labels,
-                ]
-            );
-        }
-        return abort(401);
+        $this->authorize('create', Task::class);
+
+        return view('tasks.create', [
+            'task' => new Task(),
+            'taskStatuses' => $this->taskStatuses,
+            'users' => $this->users,
+            'labels' => $this->labels
+        ]);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request): RedirectResponse
+    public function store(TaskRequest $request)
     {
-        $dataFill = $request->validate([
-            'name' => 'required|unique:tasks|max:20',
-            'description' => 'max:100',
-            'status_id' => 'required',
-            'assigned_to_id' => '',
-        ], [''], ['name' => __('task.task')]);
-        $labelsReq = $request->input('labels');
-        $labels = Label::find($labelsReq);
-        $task = new Task();
-        $task->fill($dataFill);
-        $task->created_by_id = Auth::id();
-        $task->save();
-        $task->labels()->attach($labels);
-        flash(__('task.flashCreate'))->success();
-        return redirect()
-            ->route('task.index');
+        $this->authorize('create', Task::class);
+        $this->saveTask(new Task(), $request, auth()->id());
+        flash(__('Задача успешно создана'))->success();
+
+        return redirect()->route('tasks.index');
     }
 
     /**
@@ -89,14 +82,10 @@ class TaskController extends Controller
      */
     public function show(Task $task)
     {
-        $labels = $task->labels;
-        return view(
-            'task.show',
-            [
-                'task' => $task,
-                'labels' => $labels,
-            ]
-        );
+        $this->authorize('view', $task);
+        $task = Task::findOrFail($task->id);
+
+        return view('tasks.show', compact('task'));
     }
 
     /**
@@ -104,42 +93,26 @@ class TaskController extends Controller
      */
     public function edit(Task $task)
     {
-        if (Auth::check()) {
-            $taskStatuses = TaskStatus::all();
-            $users = User::all();
-            $labels = Label::all();
-            return view(
-                'task.edit',
-                [
-                    'task' => $task,
-                    'task_statuses' => $taskStatuses,
-                    'users' => $users,
-                    'labels' => $labels,
-                ]
-            );
-        }
-        return abort(401);
+        $this->authorize('update', $task);
+
+        return view('tasks.edit', [
+            'task' => Task::findOrFail($task->id),
+            'taskStatuses' => $this->taskStatuses,
+            'users' => $this->users,
+            'labels' => $this->labels
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Task $task): RedirectResponse
+    public function update(TaskRequest $request, Task $task)
     {
-        $dataFill = $request->validate([
-            'name' => "required|max:20|unique:tasks,name,{$task->id}",
-            'description' => 'max:100',
-            'status_id' => 'required',
-            'assigned_to_id' => '',
-        ], [''], ['name' => __('task.task')]);
-        $task->fill($dataFill);
-        $task->save();
-        $labelsReq = $request->input('labels');
-        $labels = Label::find($labelsReq) ?? [];
-        $task->labels()->sync($labels);
-        flash(__('task.flashChange'))->success();
-        return redirect()
-            ->route('task.index');
+        $this->authorize('update', $task);
+        $this->saveTask($task, $request);
+        flash(__('Задача успешно изменена'))->success();
+
+        return redirect()->route('tasks.index');
     }
 
     /**
@@ -147,12 +120,29 @@ class TaskController extends Controller
      */
     public function destroy(Task $task)
     {
-        if (Auth::check()) {
-            $task->labels()->detach();
+        $this->authorize('delete', $task);
+
+        try {
             $task->delete();
-            flash(__('task.flashDelete'))->success();
-            return redirect()->route('task.index');
+            flash(__('Задача успешно удалена'))->success();
+        } catch (\Exception $e) {
+            flash(__('Не удалось удалить задачу'))->error();
         }
-        return abort(401);
+
+        return redirect()->route('tasks.index');
+    }
+
+    /**
+     * Save the task to the database.
+     */
+    private function saveTask(Task $task, TaskRequest $request, mixed $author_id = null)
+    {
+        $validated = $request->validated();
+        $task->fill($validated);
+        if ($author_id !== null) {
+            $task->created_by_id = $author_id;
+        }
+        $task->save();
+        $task->labels()->sync($validated['labels']);
     }
 }
