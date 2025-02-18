@@ -1,45 +1,38 @@
-PORT ?= 8000
 start:
-	PHP_CLI_SERVER_WORKERS=5 php -S 0.0.0.0:$(PORT) -t public
+	php artisan serve --host 0.0.0.0
 
-install:
-	composer install
-	cp -n .env.example .env
-	php artisan key:gen --ansi
-	php artisan migrate --force
-	php artisan db:seed --force
-	npm ci
-	npm run build
-	make ide-helper
+start-npm:
+	npm run dev
 
-install-prod:
+setup:
 	composer install
-	cp -n .env.example .env
-	php artisan key:gen --ansi
-	php artisan migrate:fresh --seed --force
-	npm ci
-	npm run build
 
-install-test:
-	composer install
-	cp -n .env.example.test .env
-	php artisan key:gen --ansi
+db-create:
 	touch database/database.sqlite
-	php artisan migrate --force
-	php artisan db:seed --force
-	npm ci
-	npm run build
+
+migrate:
+	php artisan migrate
+
+seed:
+	php artisan db:seed
 
 test:
 	php artisan test
-validate:
-	composer validate
+
 test-coverage:
-	XDEBUG_MODE=coverage php artisan test --coverage-html build/logs/html
+	XDEBUG_MODE=coverage php artisan test --coverage-clover build/logs/clover.xml
+
+lint:
+	composer exec --verbose phpcs
+
+lint-fix:
+	composer exec --verbose phpcbf
+
 ide-helper:
 	php artisan ide-helper:eloquent
 	php artisan ide-helper:gen
 	php artisan ide-helper:meta
 	php artisan ide-helper:mod -n
-lint:
-       ./vendor/bin/phpcs --standard=PSR12 app
+
+inspect:
+	composer exec --verbose phpstan analyse

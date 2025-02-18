@@ -1,6 +1,11 @@
 name: my-check
 
-on: push
+on:
+  push:
+    branches:
+      - '**'
+    tags:
+      - '**'
 
 jobs:
   build:
@@ -8,13 +13,23 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: php
-        uses: shivammathur/setup-php@v2 
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.3'
+          php-version: '8.2'
 
-      - name: composer
-        run: composer install
+      - name: Setup
+        run: make setup
 
-      - name: validate
-        run: composer validate
+      - name: Run linter
+        run: make lint
+
+#      - name: Run test & publish code coverage
+#        uses: paambaati/codeclimate-action@v3.2.0
+#        env:
+#          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+#          XDEBUG_MODE: coverage
+#        with:
+#          coverageCommand: make test-coverage
+#          coverageLocations: ${{github.workplace}}/build/logs/clover.xml:clover
+#          debug: true
