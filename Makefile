@@ -36,3 +36,5 @@ ide-helper:
 
 inspect:
 	composer exec --verbose phpstan analyse
+lint:
+       cd code && phpstan --memory-limit=2G --ansi analyse -c ../phpstan.neon || true
