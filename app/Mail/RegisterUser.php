@@ -29,12 +29,12 @@ class RegisterUser extends Mailable
      */
     public function envelope(): Envelope
     {
+        $from = (string) env('MAIL_FROM_ADDRESS');
         return new Envelope(
-            from: env('MAIL_FROM_ADDRESS'),
+            from: $from,
             subject: 'Register User',
         );
     }
-
     /**
      * Get the message content definition.
      */
