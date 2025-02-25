@@ -34,4 +34,4 @@ ide-helper:
 lint:
 	composer exec --verbose phpcs
 inspect:
-	composer exec --verbose phpstan analyse -- --memory-limit 2G
+	composer exec --verbose phpstan analyse -- --memory-limit 512M
