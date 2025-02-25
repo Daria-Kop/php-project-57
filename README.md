@@ -10,39 +10,31 @@
 
 [![my-check](https://github.com/Daria-Kop/php-project-57/actions/workflows/my-check.yml/badge.svg)](https://github.com/Daria-Kop/php-project-57/actions/workflows/my-check.yml)
 
-## About
+## О проекте
 
 Трекер задач на laravel
+Task Manager – система управления задачами, подобная http://www.redmine.org/. Она позволяет ставить задачи, назначать исполнителей и менять их статусы. Для работы с системой требуется регистрация и аутентификация.
 
-## Requirements
+## Требования
 
-> PHP 8.2
->
->Composer
->
->Node.js & npm
->
->SQLite for local
->
->Make
->
+* PHP >= 7.4
+* Composer >= 2
+* make >= 4
 
-## Install
+## Установка и запуск
 
-> $ git clone https://github.com/Daria-Kop/php-project-57
+> $ git clone https://github.com/Daria-Kop/php-project-57 клонируйте репозиторий
 >
->$ cd php-project-57
+>$ cd php-project-57 откройте репозитория
 >
->$ make setup
+>$ make setup установите composer
 >
->$ make db-create
+>$ make db-create запустите классы сидеров, которые содержат инструкции по созданию тестовых или начальных данных в таблице базы данных
 >
->$ make migrate
+>$ make migrate выполнение миграций
 >
->$ make seed
->
->$ make start
+>$ make start запуск проекта локально
 
-## Example
+## Пример
 
-https://php-project-57-78sc.onrender.com
+https://php-project-57-qers.onrender.com
