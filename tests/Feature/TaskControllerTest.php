@@ -6,8 +6,6 @@ use App\Models\Task;
 use App\Models\TaskStatus;
 use App\Models\User;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Facades\Auth;
-use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class TaskControllerTest extends TestCase
@@ -18,9 +16,7 @@ class TaskControllerTest extends TestCase
     {
         parent::setUp();
 
-        $users = User::factory()->count(1)->create();
         TaskStatus::factory()->count(5)->create();
-        $this->actingAs($users->random());
         $this->task = Task::factory()->create();
     }
 
@@ -42,7 +38,6 @@ class TaskControllerTest extends TestCase
         string $viewHas,
         ?string $view = null,
     ) {
-        auth()->logout();
         $response = $this->get(route($path, $param));
 
         $response->assertStatus($code);
@@ -54,6 +49,7 @@ class TaskControllerTest extends TestCase
 
     public function testIndex()
     {
+        $this->actingAs(User::factory()->create());
         Task::factory()->count(10)->create();
         $response = $this->get(route('tasks.index'));
 
@@ -66,6 +62,7 @@ class TaskControllerTest extends TestCase
 
     public function testCreate()
     {
+        $this->actingAs(User::factory()->create());
         $response = $this->get(route('tasks.create'));
 
         $response->assertStatus(200);
@@ -74,6 +71,7 @@ class TaskControllerTest extends TestCase
 
     public function testEdit()
     {
+        $this->actingAs(User::factory()->create());
         $response = $this->get(route('tasks.edit', ['task' => $this->task->id]));
 
         $response->assertStatus(200);
@@ -83,16 +81,18 @@ class TaskControllerTest extends TestCase
 
     public function testStore()
     {
+        $this->actingAs(User::factory()->create());
         $task = Task::factory()->make();
         $response = $this->post(route('tasks.store'), $task->toArray());
 
         $response->assertStatus(302);
-        $response->assertRedirectToRoute('tasks.index');
+        $response->assertRedirect(route('tasks.index'));
         $this->assertDatabaseHas('tasks', ['name' => $task->name]);
     }
 
     public function testShow()
     {
+        $this->actingAs(User::factory()->create());
         $response = $this->get(route('tasks.show', ['task' => $this->task->id]));
 
         $response->assertStatus(200);
@@ -102,6 +102,7 @@ class TaskControllerTest extends TestCase
 
     public function testUpdate()
     {
+        $this->actingAs(User::factory()->create());
         $updatedData = Task::factory()->make()->only([
             'name',
             'description',
@@ -111,16 +112,17 @@ class TaskControllerTest extends TestCase
         $response = $this->patch(route('tasks.update', ['task' => $this->task->id]), $updatedData);
 
         $response->assertStatus(302);
-        $response->assertRedirectToRoute('tasks.index');
+        $response->assertRedirect(route('tasks.index'));
         $this->assertDatabaseHas('tasks', $updatedData);
     }
 
     public function testDestroy()
     {
+        $this->actingAs(User::factory()->create());
         $response = $this->delete(route('tasks.destroy', ['task' => $this->task->id]));
 
         $response->assertStatus(302);
-        $response->assertRedirectToRoute('tasks.index');
+        $response->assertRedirect(route('tasks.index'));
         $this->assertModelMissing($this->task);
     }
 
@@ -129,6 +131,6 @@ class TaskControllerTest extends TestCase
         $newUser = User::factory()->create();
         $response = $this->actingAs($newUser)->delete(route('tasks.destroy', ['task' => $this->task->id]));
 
-        $response->assertStatus(302);
+        $response->assertStatus(403);
     }
 }
