@@ -31,7 +31,7 @@ ide-helper:
 	php artisan ide-helper:meta
 	php artisan ide-helper:mod -n
 
-inspect:
-	composer exec --verbose phpstan analyse
 lint:
 	composer exec --verbose phpcs
+inspect:
+	composer exec --verbose phpstan analyse -- --memory-limit 512M
