@@ -8,6 +8,7 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Mail\Mailables\Address;
 
 class ForgotPassword extends Mailable
 {
@@ -28,11 +29,10 @@ class ForgotPassword extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            from: env('MAIL_FROM_ADDRESS'),
+            from: new Address(env('MAIL_FROM_ADDRESS')), // Создаем объект Address
             subject: 'Forgot Password',
         );
     }
-
     /**
      * Get the message content definition.
      */

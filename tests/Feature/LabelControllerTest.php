@@ -16,9 +16,6 @@ class LabelControllerTest extends TestCase
     public function setUp(): void
     {
         parent::setUp();
-
-        $user = User::factory()->create();
-        $this->actingAs($user);
         $this->label = Label::factory()->create();
     }
 
@@ -47,7 +44,6 @@ class LabelControllerTest extends TestCase
     {
         Label::factory()->count(10)->create();
         $response = $this->get(route('labels.index'));
-
         $response->assertStatus(200);
         $response->assertViewIs('labels.index');
         $response->assertViewHas('labels', Label::all());
@@ -63,7 +59,6 @@ class LabelControllerTest extends TestCase
     public function testEdit()
     {
         $response = $this->get(route('labels.edit', ['label' => $this->label->id]));
-
         $response->assertStatus(200);
         $response->assertViewIs('labels.edit');
         $response->assertViewHas('label', $this->label);
@@ -73,7 +68,6 @@ class LabelControllerTest extends TestCase
     {
         $label = Label::factory()->make();
         $response = $this->post(route('labels.store'), ['name' => $label->name]);
-
         $response->assertStatus(302);
         $response->assertRedirect(route('labels.index'));
         $this->assertDatabaseHas('labels', ['name' => $label->name]);
@@ -83,7 +77,6 @@ class LabelControllerTest extends TestCase
     {
         $updatedData = ['name' => fake()->word];
         $response = $this->patch(route('labels.update', ['label' => $this->label->id]), $updatedData);
-
         $response->assertStatus(302);
         $response->assertRedirect(route('labels.index'));
         $this->assertDatabaseHas('labels', $updatedData);
@@ -92,7 +85,6 @@ class LabelControllerTest extends TestCase
     public function testDestroy()
     {
         $response = $this->delete(route('labels.destroy', ['label' => $this->label->id]));
-
         $response->assertStatus(302);
         $response->assertRedirect(route('labels.index'));
         $this->assertModelMissing($this->label);
@@ -103,9 +95,7 @@ class LabelControllerTest extends TestCase
         TaskStatus::factory()->create();
         $task = Task::factory()->create();
         $task->labels()->attach($this->label->id);
-
         $response = $this->delete(route('labels.destroy', ['label' => $this->label->id]));
-
         $response->assertStatus(302);
         $response->assertRedirect(route('labels.index'));
         $this->assertModelExists($this->label);
@@ -121,5 +111,20 @@ class LabelControllerTest extends TestCase
     {
         $response = $this->patch(route('labels.update', ['label' => $this->label->id]), []);
         $response->assertSessionHasErrors(['name']);
+    }
+
+    protected function authenticateUser(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+    }
+
+    public function testAuthenticatedUserCanAccessEdit()
+    {
+        $this->authenticateUser();
+        $response = $this->get(route('labels.edit', ['label' => $this->label->id]));
+        $response->assertStatus(200);
+        $response->assertViewIs('labels.edit');
+        $response->assertViewHas('label', $this->label);
     }
 }

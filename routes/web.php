@@ -7,8 +7,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TaskController;
 
 Route::get('/', function () {
-    return view('index');
-});
+    return view('home');
+})->name('home');
 
 Route::get('/index', function () {
     return view('index');

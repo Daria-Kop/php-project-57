@@ -21,14 +21,15 @@ class Task extends Model
         'created_by_id',
         'assigned_to_id'
     ];
-    protected $appends = ['author_name', 'status_name', 'executor_name', 'labels_name'];
+    
+    protected $appends = ['author_name', 'status_name', 'executor_name', 'labels_names'];
 
     public function author(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by_id');
     }
 
-    public function getAuthorNameAttribute()
+    public function getAuthorNameAttribute(): ?string
     {
         return $this->author->name;
     }
@@ -50,10 +51,7 @@ class Task extends Model
 
     public function getExecutorNameAttribute()
     {
-        if ($this->executor !== null) {
-            return $this->executor->name;
-        }
-        return null;
+        return $this->executor ? $this->executor->name : null;
     }
 
     public function labels(): BelongsToMany
@@ -61,7 +59,7 @@ class Task extends Model
         return $this->belongsToMany(Label::class);
     }
 
-    public function getLabelsNameAttribute()
+    public function getLabelsNamesAttribute()
     {
         return $this->labels->pluck('name')->toArray();
     }
