@@ -21,7 +21,7 @@ class Task extends Model
         'created_by_id',
         'assigned_to_id'
     ];
-    
+
     protected $appends = ['author_name', 'status_name', 'executor_name', 'labels_names'];
 
     public function author(): BelongsTo
