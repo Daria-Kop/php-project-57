@@ -36,11 +36,5 @@ lint:
 inspect:
 	composer exec --verbose phpstan analyse -- --memory-limit 512M
 install-test:
-	composer install
-	cp -n .env.example.test .env
-	php artisan key:gen --ansi
-	touch database/database.sqlite
-	php artisan migrate --force
-	php artisan db:seed --force
-	npm ci
-	npm run build
+       @echo "Установка тестовых зависимостей..."
+       composer install --dev
