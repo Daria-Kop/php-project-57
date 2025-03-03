@@ -36,5 +36,5 @@ lint:
 inspect:
 	composer exec --verbose phpstan analyse -- --memory-limit 512M
 install-test:
-       @echo "Установка тестовых зависимостей..."
-       composer install --dev
+	@echo "Установка тестовых зависимостей..."
+	composer install --dev
