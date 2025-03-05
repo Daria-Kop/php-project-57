@@ -3,15 +3,12 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Mail\RegisterUser;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Redirect;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
 
@@ -22,7 +19,6 @@ class RegisteredUserController extends Controller
      */
     public function create(): View
     {
-        Redirect::setIntendedUrl(url()->previous());
         return view('auth.register');
     }
 
@@ -35,7 +31,7 @@ class RegisteredUserController extends Controller
     {
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
@@ -49,12 +45,6 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        if (env('MAIL_ENABLED')) {
-            Mail::to($request->user())->send(new RegisterUser($user));
-        }
-
-        flash('Пользователь зарегистрирован')->success();
-
-        return redirect()->intended(route('index', absolute: false));
+        return redirect(route('dashboard', absolute: false));
     }
 }

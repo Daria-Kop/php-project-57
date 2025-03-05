@@ -2,88 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
-html, body {
-    font-family: Nunito, ui-sans-serif, system-ui;
-}
-
-ul.error-list li {
-    list-style: disc;
-    margin-left: 20px;
-}
-
-div.alert {
-    position: relative;
-    top: 60px;
-    /*padding: 20px;*/
-}
-
 .alert-success {
-    color: #3c763d;
-    background-color: #dff0d8;
-    border-color: #d6e9c6;
+    background-color: #bbf7d0;
 }
 
 .alert-danger {
-    color: #a94442;
-    background-color: #f2dede;
-    border-color: #ebccd1;
+    background-color: #fecdd3
 }
 
-.alert {
-    padding: 15px;
-    margin-bottom: 20px;
-    border: 1px solid transparent;
-    border-radius: 4px;
+h1 {
+    font-size: 3rem
 }
 
-.btn-primary {
-    background: rgb(59, 130, 246);
-    color: #fff;
-    font-weight: 700;
-    padding: .5rem 1rem;
-    border-radius: .25rem;
-}
-
-.btn-primary:hover {
-    background: rgb(29, 78, 216);
-}
-
-select,
-select[multiple],
-textarea,
-input[type="text"] {
-    border-color: rgb(209 213 219);
-    border-radius: .25rem;
-}
-
-select:focus,
-textarea:focus,
-input[type="text"]:focus {
-    border-color: rgb(99, 102, 241);
-}
-
-.lblspan {
-    color: rgb(29 78 216);
-    font-weight: 700;
-    font-size: .75rem;
-    line-height: 1rem;
-    text-transform: uppercase;
-    background: rgb(191 219 254);
-    border-radius: 9999px;
-    display: inline-flex;
-    padding: .25rem .75rem;
-    align-items: center;
-}
-
-.plus-button {
-    padding: 2px 6px;
-    text-align: center;
-    margin: 4px 2px;
-    border-radius: .25rem;
-    background: rgb(59, 130, 246);
-    color: #fff;
-}
-
-.plus-button:hover {
-    background: rgb(29, 78, 216);
+h2 {
+    font-size: 2rem
 }

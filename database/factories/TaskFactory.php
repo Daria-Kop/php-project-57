@@ -3,8 +3,8 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use App\Models\TaskStatus;
-use App\Models\User;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Task>
@@ -18,15 +18,12 @@ class TaskFactory extends Factory
      */
     public function definition(): array
     {
-        $statusIds = TaskStatus::pluck('id')->toArray();
-        $userIds = User::pluck('id')->toArray();
-
         return [
-            'name' => $this->faker->sentence(3),
-            'description' => $this->faker->sentence(6),
-            'status_id' => $this->faker->randomElement($statusIds),
-            'created_by_id' => $this->faker->randomElement($userIds),
-            'assigned_to_id' => $this->faker->randomElement($userIds),
+            'name' => fake('ru_RU')->word(),
+            'description' => fake('ru_RU')->sentence(),
+            'status_id' => '',
+            'created_by_id' => '',
+            'assigned_to_id' => '',
         ];
     }
 }
