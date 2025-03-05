@@ -8,6 +8,8 @@
 
 [![Test Coverage](https://api.codeclimate.com/v1/badges/c587d7a034a4930267dd/test_coverage)](https://codeclimate.com/github/Daria-Kop/php-project-57/test_coverage)
 
+[![PHP CI](https://github.com/Daria-Kop/php-project-57/actions/workflows/workflow.yml/badge.svg)](https://github.com/Daria-Kop/php-project-57/actions/workflows/workflow.yml.yml)
+
 ## О проекте
 
 Трекер задач на laravel
