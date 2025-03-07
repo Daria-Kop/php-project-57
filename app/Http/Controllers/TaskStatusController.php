@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\TaskStatus;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 use Illuminate\Support\Facades\Auth;
 
 class TaskStatusController extends Controller
@@ -12,7 +13,7 @@ class TaskStatusController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(): View
     {
         $statuses = TaskStatus::paginate();
         return view('task_status.index', compact('statuses'));
@@ -21,7 +22,7 @@ class TaskStatusController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(): View|RedirectResponse
     {
         if (Auth::check()) {
             return view('task_status.create');
@@ -48,7 +49,7 @@ class TaskStatusController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(TaskStatus $taskStatus)
+    public function edit(TaskStatus $taskStatus): View|RedirectResponse
     {
         if (Auth::check()) {
             return view('task_status.edit', ['task_status' => $taskStatus]);
@@ -74,7 +75,7 @@ class TaskStatusController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(TaskStatus $taskStatus)
+    public function destroy(TaskStatus $taskStatus): RedirectResponse
     {
         if (Auth::check()) {
             try {
