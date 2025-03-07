@@ -32,21 +32,14 @@ class TaskStatusController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function __construct()
-    {
-        $this->middleware('auth'); // Только для авторизованных пользователей
-    }
-
     public function store(Request $request): RedirectResponse
     {
         $data = $request->validate([
             'name' => 'required|unique:task_statuses|max:20'
-        ], [], ['name' => __('task_status.status')]);
-
+        ], [''], ['name' => __('task_status.status')]);
         $status = new TaskStatus();
         $status->fill($data);
         $status->save();
-
         flash(__('task_status.flashCreate'))->success();
         return redirect()
             ->route('status.index');
